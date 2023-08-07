@@ -1,5 +1,6 @@
 package aap.ettersendelse
 
+import aap.ettersendelse.data.Ettersendelse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.serialization.jackson.*
@@ -8,6 +9,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
@@ -42,7 +44,9 @@ private fun Application.server(kafka: Streams = KafkaStreams()) {
         actuators(prometheus, kafka)
         route("/v1/ettersendelse") {
             post {
-
+                val ettersendelse = call.receive<Ettersendelse>()
+                //kafka.send(ettersendelse)
+                call.respond(ettersendelse)
             }
             get { call.respondText("Hello, world!") }
         }
