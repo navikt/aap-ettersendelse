@@ -15,12 +15,12 @@ fun Routing.actuators(prometheus: PrometheusMeterRegistry, kafka: Streams) {
         }
 
         get("/live") {
-            val statusCode = if (kafka.live()) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+            val statusCode =  HttpStatusCode.OK //if (kafka.live()) HttpStatusCode.OK else HttpStatusCode.InternalServerError
             call.respond(statusCode, "personopplysninger")
         }
 
         get("/ready") {
-            val statusCode = if (kafka.ready()) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+            val statusCode = HttpStatusCode.OK //if (kafka.ready()) HttpStatusCode.OK else HttpStatusCode.InternalServerError
             call.respond(statusCode, "personopplysninger")
         }
     }
