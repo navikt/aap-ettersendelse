@@ -1,0 +1,44 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: ettersendelse
+  namespace: aap
+  labels:
+    team: aap
+spec:
+  image: {{image}}
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 4
+    min: 2
+  tokenx:
+    enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: innsyn
+          namespace: aap
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
+  kafka:
+    pool: {{kafka-pool}}
+    streams: true
+  liveness:
+    path: /actuator/live
+    initialDelay: 3
+    periodSeconds: 3
+    failureThreshold: 21
+  readiness:
+    path: /actuator/ready
+    initialDelay: 3
+    periodSeconds: 3
+    failureThreshold: 21
+  prometheus:
+    enabled: true
+    path: /actuator/metrics
+  secureLogs:
+    enabled: true

@@ -1,0 +1,7 @@
+kafka:
+  application-id: 111
+  brokers: 1111
+  ssl:
+    truststorePath: 2123
+    keystorePath: 3213
+    credstorePsw: 421321
