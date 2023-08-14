@@ -3,8 +3,11 @@ package aap.ettersendelse
 import aap.ettersendelse.data.Ettersendelse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
@@ -18,6 +21,9 @@ import no.nav.aap.kafka.streams.v2.Streams
 import no.nav.aap.kafka.streams.v2.KafkaStreams
 import no.nav.aap.ktor.config.loadConfig
 import org.slf4j.LoggerFactory
+import com.auth0.jwk.JwkProvider
+import com.auth0.jwk.JwkProviderBuilder
+import java.util.concurrent.TimeUnit
 
 private val sikkerLogg = LoggerFactory.getLogger("secureLog")
 
@@ -40,15 +46,39 @@ private fun Application.server(kafka: Streams = KafkaStreams()) {
     Thread.currentThread().setUncaughtExceptionHandler { _, e -> sikkerLogg.error("Uhåndtert feil", e) }
     environment.monitor.subscribe(ApplicationStopping) { kafka.close() }
 
+    val tokenxJwkProvider: JwkProvider = JwkProviderBuilder(config.tokenx.jwksUrl)
+        .cached(10, 24, TimeUnit.HOURS)
+        .rateLimited(10, 1, TimeUnit.MINUTES)
+        .build()
+
+
+    install(Authentication){
+        jwt("tokenx") {
+            realm = "Hent dokumenter"
+            verifier(tokenxJwkProvider, config.tokenx.issuer)
+            challenge { _, _ -> call.respondText("Ikke tilgang", status = HttpStatusCode.Unauthorized) }
+            validate { cred ->
+                if (cred.audience.contains(config.tokenx.clientId) && cred.getClaim("pid", String::class) != null) {
+                    JWTPrincipal(cred.payload)
+                } else {
+                    null
+                }
+            }
+        }
+    }
+
     routing {
         actuators(prometheus, kafka)
-        route("/v1/ettersendelse") {
-            post {
-                val ettersendelse = call.receive<Ettersendelse>()
-                //kafka.send(ettersendelse)
-                call.respond(ettersendelse)
+        authenticate {
+            route("/v1/ettersendelse") {
+                post {
+                    val ettersendelse = call.receive<Ettersendelse>()
+
+                    //kafka.send(ettersendelse)
+                    call.respond(ettersendelse)
+                }
+                get { call.respondText("Hello, world!") }
             }
-            get { call.respondText("Hello, world!") }
         }
     }
 }
