@@ -74,7 +74,7 @@ private fun Application.server(kafka: Streams = KafkaStreams()) {
                 post {
                     val ettersendelse = call.receive<Ettersendelse>()
 
-                    //kafka.send(ettersendelse)
+                    //kafka.send(ettersendelse) 🐶
                     call.respond(ettersendelse)
                 }
                 get { call.respondText("Hello, world!") }
