@@ -1,6 +1,8 @@
 package aap.ettersendelse
 
 import aap.ettersendelse.data.Ettersendelse
+import com.auth0.jwk.JwkProvider
+import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*
@@ -17,12 +19,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import no.nav.aap.kafka.streams.v2.Streams
 import no.nav.aap.kafka.streams.v2.KafkaStreams
+import no.nav.aap.kafka.streams.v2.Streams
 import no.nav.aap.ktor.config.loadConfig
 import org.slf4j.LoggerFactory
-import com.auth0.jwk.JwkProvider
-import com.auth0.jwk.JwkProviderBuilder
 import java.util.concurrent.TimeUnit
 
 private val sikkerLogg = LoggerFactory.getLogger("secureLog")
